@@ -1,4 +1,3 @@
-# config/config.py
 import os
 
 CHUNK_SIZE = 500
@@ -13,11 +12,11 @@ JUDGE_MODEL = "minimax/minimax-m2.5:free"
 EMBEDDING_MODEL_NAME = "thenlper/gte-small"
 
 # Whisper Fallback Settings
-WHISPER_ENABLED = True  # Enable/disable Whisper fallback
-WHISPER_MODEL = "base"  # Whisper model: tiny, base, small, medium, large
-WHISPER_LANGUAGE = "en"  # Language code for transcription
+WHISPER_ENABLED = True  
+WHISPER_MODEL = "base"  
+WHISPER_LANGUAGE = "en"  
 
-ENV = os.getenv("APP_ENV", "dev").lower()  # dev = benchmark + detailed logging, prod = single model + lightweight logging
+ENV = os.getenv("APP_ENV", "dev").lower()  
 CACHE_DIR = "logs/cache"
 SYSTEM_LOG_FILE = "logs/systems.log"
 BENCHMARK_RESULTS_FILE = "logs/benchmark_results.json"

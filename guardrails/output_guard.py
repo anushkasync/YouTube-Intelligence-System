@@ -1,5 +1,3 @@
-# guardrails/output_guard.py
-
 def validate_output(output, min_length=20):
     if output is None:
         return False

@@ -1,5 +1,3 @@
-# api/app.py
-
 import os
 import time
 import uuid
@@ -23,27 +21,14 @@ from api.schemas import (
     HealthResponse,
 )
 
-# =====================================================
-# ENV
-# =====================================================
-
 load_dotenv()
 
 ENV = os.getenv("ENV", "prod").lower()
 
 logger = get_logger("FASTAPI")
 
-# =====================================================
-# GLOBAL SINGLETONS
-# =====================================================
-
 cache = None
 llm = None
-
-# =====================================================
-# STARTUP / SHUTDOWN
-# =====================================================
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -53,19 +38,11 @@ async def lifespan(app: FastAPI):
 
     logger.info("FastAPI application starting")
 
-    # ---------------------------
-    # CACHE INIT
-    # ---------------------------
-
     cache = CacheManager(
         base_dir=CONFIG["CACHE_DIR"]
     )
 
     logger.info("Cache manager initialized")
-
-    # ---------------------------
-    # LLM INIT
-    # ---------------------------
 
     api_key = os.getenv("OPENROUTER_API_KEY")
 
@@ -85,21 +62,12 @@ async def lifespan(app: FastAPI):
 
     logger.info("FastAPI application shutting down")
 
-
-# =====================================================
-# FASTAPI APP
-# =====================================================
-
 app = FastAPI(
     title="Agentic RAG API",
     version="1.0.0",
     description="Production API for Agentic RAG YouTube System",
     lifespan=lifespan
 )
-
-# =====================================================
-# ROOT
-# =====================================================
 
 
 @app.get("/")
@@ -110,11 +78,6 @@ def root():
         "docs": "/docs",
         "redoc": "/redoc"
     }
-
-
-# =====================================================
-# HEALTH ENDPOINT
-# =====================================================
 
 
 @app.get(
@@ -128,11 +91,6 @@ def health():
         "cache": "initialized" if cache else "not_initialized",
         "llm": "initialized" if llm else "not_initialized"
     }
-
-
-# =====================================================
-# QUERY ENDPOINT
-# =====================================================
 
 
 @app.post(
@@ -151,10 +109,6 @@ def query_video(request: QueryRequest):
 
     try:
 
-        # =============================================
-        # RUN ORIGINAL PIPELINE
-        # =============================================
-
         result = run_pipeline(
             youtube_url=request.youtube_url,
             user_query=request.query,
@@ -165,10 +119,6 @@ def query_video(request: QueryRequest):
 
         output = result.get("output", "")
         metadata = result.get("metadata", {})
-
-        # =============================================
-        # ADD EXTRA API METADATA
-        # =============================================
 
         metadata["trace_id"] = trace_id
         metadata["latency"] = round(
@@ -202,11 +152,6 @@ def query_video(request: QueryRequest):
         )
 
 
-# =====================================================
-# EVALUATION ENDPOINT
-# =====================================================
-
-
 @app.post("/evaluation")
 def evaluation():
 
@@ -219,11 +164,6 @@ def evaluation():
     start = time.time()
 
     try:
-
-        # =============================================
-        # SAME AS:
-        # python main.py --eval
-        # =============================================
 
         result = run_full_suite(
             cache=cache,
@@ -264,12 +204,6 @@ def evaluation():
             }
         )
 
-
-# =====================================================
-# BENCHMARK ENDPOINT
-# =====================================================
-
-
 @app.post("/benchmark")
 def benchmark():
 
@@ -282,11 +216,6 @@ def benchmark():
     start = time.time()
 
     try:
-
-        # =============================================
-        # SAME AS:
-        # python main.py --benchmark
-        # =============================================
 
         result = run_full_suite(
             cache=cache,

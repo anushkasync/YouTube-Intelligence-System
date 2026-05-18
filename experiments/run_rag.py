@@ -1,4 +1,3 @@
-# run_rag.py
 import time
 from run_pipeline import run_pipeline
 

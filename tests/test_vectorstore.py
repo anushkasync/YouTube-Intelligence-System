@@ -1,5 +1,3 @@
-# test_vectorstore.py
-
 import pytest
 
 from rag.vectorstore import create_vectorstore

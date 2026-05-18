@@ -1,5 +1,3 @@
-# rag/vectorstore.py
-
 from logger import get_logger
 from langchain_community.vectorstores import FAISS
 from data.documents import build_documents

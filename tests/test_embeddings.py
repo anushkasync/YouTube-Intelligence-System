@@ -1,4 +1,3 @@
-
 from rag.embeddings import embedding_model
 
 def test_embeddings_created_for_all_chunks():

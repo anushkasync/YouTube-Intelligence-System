@@ -1,4 +1,3 @@
-
 import pytest
 import json
 from utils.cache_manager import CacheManager, stable_hash
@@ -15,20 +14,12 @@ def test_stable_hash_consistency():
 
     assert h1 == h2
 
-# -----------------------------
-# TEST: TRANSCRIPT SAVE/GET
-# -----------------------------
-
 def test_transcript_save_get(cache):
 
     cache.save_transcript("vid1", "hello transcript")
 
     assert cache.get_transcript("vid1") == "hello transcript"
 
-
-# -----------------------------
-# TEST: CHUNKS SAVE/GET
-# -----------------------------
 
 def test_chunks_save_get(cache):
 
@@ -38,9 +29,6 @@ def test_chunks_save_get(cache):
 
     assert cache.get_chunks(key) == ["a", "b"]
 
-# -----------------------------
-# TEST: PROCESSED CHUNKS
-# -----------------------------
 
 def test_processed_chunks(cache):
 
@@ -50,9 +38,6 @@ def test_processed_chunks(cache):
 
     assert cache.get_processed_chunks(key) == ["x", "y"]
 
-# -----------------------------
-# TEST: LLM CACHE
-# -----------------------------
 
 def test_llm_cache(cache):
 
@@ -62,10 +47,6 @@ def test_llm_cache(cache):
 
     assert cache.get_llm_output(key) == "response"
 
-
-# -----------------------------
-# TEST: VECTORSTORE KEY
-# -----------------------------
 
 def test_vectorstore_key_generation(cache):
 
@@ -84,11 +65,6 @@ def test_vectorstore_key_generation(cache):
     })
 
     assert key == expected_hash
-
-
-# -----------------------------
-# TEST: VECTORSTORE SAVE/LOAD (MOCKED)
-# -----------------------------
 
 class FakeVectorstore:
 

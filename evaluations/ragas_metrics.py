@@ -1,5 +1,3 @@
-# ragas_metrics.py
-
 import os
 from dotenv import load_dotenv
 from ragas import evaluate
@@ -7,12 +5,10 @@ from ragas.metrics.collections import faithfulness, answer_relevancy
 from ragas.llms import LangchainLLMWrapper
 from utils.llm import OpenRouterLLM
 from utils.cache_manager import CacheManager
-# from langchain_openrouter import ChatOpenRouter
 from ragas.embeddings import HuggingFaceEmbeddings
 from datasets import Dataset
 from config.config import JUDGE_MODEL, EMBEDDING_MODEL_NAME
 
-# Load variables from .env into the environment
 load_dotenv()
 
 cache_manager = CacheManager()
@@ -35,13 +31,9 @@ def ragas_metrics(query, context, response, ground_truth=None):
     openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
     try:
-        # -----------------------------
-        # VALIDATE + NORMALIZE CONTEXT
-        # -----------------------------
         if context is None:
             context = []
 
-        # ensure context is list of strings
         if isinstance(context, str):
             context = [context]
 

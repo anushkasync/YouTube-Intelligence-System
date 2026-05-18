@@ -1,7 +1,4 @@
-# guardrails/intent_guard.py
-
 VALID_TASKS = {"summary", "keypoints", "qa_gen", "rag"}
-
 
 def validate_intent_labels(labels):
 

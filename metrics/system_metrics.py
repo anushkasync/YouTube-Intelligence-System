@@ -1,5 +1,3 @@
-# system_metrics.py
-
 """System performance and efficiency metrics"""
 
 try:

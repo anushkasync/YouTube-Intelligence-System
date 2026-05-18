@@ -1,4 +1,3 @@
-# evaluations/llm_judge.py
 """
 UX Quality Evaluation using LLM Judge
 Measures: clarity, completeness, usefulness

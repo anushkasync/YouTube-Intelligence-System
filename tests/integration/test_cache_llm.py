@@ -1,12 +1,5 @@
-import pytest
-
 from utils.cache_manager import CacheManager
 from utils.llm import OpenRouterLLM
-
-
-# ---------------------------------------------------
-# MOCK LLM
-# ---------------------------------------------------
 
 class MockResponse:
 
@@ -50,10 +43,6 @@ def fake_post(*args, **kwargs):
 
     return FakeResponse()
 
-# ---------------------------------------------------
-# TEST: CACHE INTEGRATION FLOW
-# ---------------------------------------------------
-
 def test_llm_cache_integration(tmp_path, monkeypatch):
 
     cache = CacheManager(base_dir=tmp_path)
@@ -92,7 +81,6 @@ def test_llm_cache_integration(tmp_path, monkeypatch):
 
     assert res1.content == "fresh response from LLM"
 
-    # cache should now exist
     key = cache.make_llm_key(
         "What is machine learning?",
         "test-model"
@@ -100,15 +88,9 @@ def test_llm_cache_integration(tmp_path, monkeypatch):
 
     assert cache.get_llm_output(key) == "fresh response from LLM"
 
-    # second call → cache hit (no API call)
     res2 = service.invoke("What is machine learning?")
 
     assert res2.content == "fresh response from LLM"
-
-
-# ---------------------------------------------------
-# CACHE PERSISTENCE TEST
-# ---------------------------------------------------
 
 def test_cache_persistence(tmp_path):
 
@@ -118,7 +100,6 @@ def test_cache_persistence(tmp_path):
 
     cache1.save_llm_output(key, "cached value")
 
-    # simulate restart (new instance)
     cache2 = CacheManager(base_dir=tmp_path)
 
     assert cache2.get_llm_output(key) == "cached value"

@@ -1,5 +1,3 @@
-# tests/integration/test_rag_flow.py
-
 import pytest
 
 from agent import answer_with_rag
@@ -8,20 +6,10 @@ from rag.vectorstore import create_vectorstore
 
 from rag.embeddings import embedding_model
 
-
-# ---------------------------------------------------
-# MOCK RESPONSE
-# ---------------------------------------------------
-
 class MockResponse:
 
     def __init__(self, content):
         self.content = content
-
-
-# ---------------------------------------------------
-# SUCCESS LLM
-# ---------------------------------------------------
 
 class SuccessMockLLM:
 
@@ -34,11 +22,6 @@ class SuccessMockLLM:
             "This is the generated RAG answer."
         )
 
-
-# ---------------------------------------------------
-# FALLBACK LLM
-# ---------------------------------------------------
-
 class FallbackMockLLM:
 
     def invoke(self, prompt):
@@ -46,11 +29,6 @@ class FallbackMockLLM:
         pytest.fail(
             "LLM should not be called during fallback"
         )
-
-
-# ---------------------------------------------------
-# FIXTURES
-# ---------------------------------------------------
 
 @pytest.fixture
 def chunks():
@@ -92,11 +70,6 @@ def metadata():
         "retrieval": {}
     }
 
-
-# ---------------------------------------------------
-# TEST: RAG INTEGRATION SUCCESS
-# ---------------------------------------------------
-
 def test_rag_integration_success(
     vectorstore,
     success_llm,
@@ -116,11 +89,6 @@ def test_rag_integration_success(
     assert metadata["retrieval"]["top_k"] > 0
 
     assert metadata["retrieval"]["score"] > 0
-
-
-# ---------------------------------------------------
-# TEST: RAG INTEGRATION FALLBACK
-# ---------------------------------------------------
 
 def test_rag_integration_fallback(
     vectorstore,

@@ -1,10 +1,6 @@
-
 from agent import (decide_mode, classify_intent, answer_with_rag, run_agent)
 from guardrails.context_guard import FALLBACK_RESPONSE
 
-# ---------------------------
-# MOCKS
-# ---------------------------
 
 class MockResponse:
 
@@ -42,11 +38,6 @@ class MockVectorstoreWithResults:
             MockDocument("deep learning models")
         ]
 
-
-# ---------------------------
-# MODE TESTS
-# ---------------------------
-
 def test_decide_mode_small():
 
     chunks = ["a", "b", "c"]
@@ -72,11 +63,6 @@ def test_decide_mode_long():
     result = decide_mode(chunks)
 
     assert result == "long"
-
-
-# ---------------------------
-# INTENT TESTS
-# ---------------------------
 
 def test_classify_intent_summary():
 
@@ -141,11 +127,6 @@ def test_classify_intent_invalid():
     assert metadata["failure_reason"] == "INVALID_INTENT"
 
     assert metadata["fallback_triggered"] is True
-
-
-# ---------------------------
-# RAG TESTS
-# ---------------------------
 
 def test_rag_no_retrieval():
 
@@ -241,11 +222,6 @@ def test_rag_success(monkeypatch):
     assert metadata["retrieval"]["top_k"] == 2
 
     assert metadata["retrieval"]["score"] == 0.9
-
-
-# ---------------------------
-# AGENT ROUTING TESTS
-# ---------------------------
 
 def test_run_agent_summary_routing(monkeypatch):
 
@@ -368,11 +344,6 @@ def test_run_agent_rag_routing(monkeypatch):
     assert result["output"] == "This is sufficiently long rag output"
 
     assert result["metadata"]["task"] == "rag"
-
-
-# ---------------------------
-# FALLBACK TESTS
-# ---------------------------
 
 def test_run_agent_invalid_input(monkeypatch):
 

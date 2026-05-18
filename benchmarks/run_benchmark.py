@@ -1,5 +1,3 @@
-# run_benchmark.py 
-
 from datetime import datetime
 from metrics.retrieval_eval import retrieval_metrics
 from metrics.system_metrics import system_metrics
@@ -8,7 +6,7 @@ from config.config import CONFIG
 
 def run_benchmark(evaluated_results):
 
-    print("🧪 BENCHMARK STARTED")
+    print("BENCHMARK STARTED")
 
     if not isinstance(evaluated_results, list):
         raise ValueError("Expected list of evaluated results")
@@ -56,6 +54,6 @@ def run_benchmark(evaluated_results):
 )
     results["timestamp"] = datetime.utcnow().isoformat() + "Z"
 
-    print("🏁 BENCHMARK COMPLETE")
+    print("BENCHMARK COMPLETE")
 
     return results

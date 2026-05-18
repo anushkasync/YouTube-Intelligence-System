@@ -1,4 +1,3 @@
-# rag/retriever.py
 from typing import List, Dict, Any
 from logger import get_logger
 

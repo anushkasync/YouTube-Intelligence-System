@@ -1,5 +1,3 @@
-# guardrails/input_guard.py
-
 def validate_query(query):
     if not query or len(query.strip()) < 3:
         return False, "Query too short"

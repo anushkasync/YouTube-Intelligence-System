@@ -1,22 +1,12 @@
-# logger.py
-
 import os
 import json
 import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
-# ---------------------------
-# LOG DIRECTORY
-# ---------------------------
-
 LOG_DIR = "logs"
 
 os.makedirs(LOG_DIR, exist_ok=True)
-
-# ---------------------------
-# LOGGER SETUP
-# ---------------------------
 
 logger = logging.getLogger("rag_system")
 
@@ -24,21 +14,12 @@ logger.setLevel(logging.INFO)
 
 logger.propagate = False
 
-# Avoid duplicate handlers
 if not logger.handlers:
-
-    # ---------------------------
-    # FORMATTER
-    # ---------------------------
 
     formatter = logging.Formatter(
         fmt="%(asctime)s | %(levelname)s | %(trace_id)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
-
-    # ---------------------------
-    # CONSOLE HANDLER
-    # ---------------------------
 
     console_handler = logging.StreamHandler()
 
@@ -47,10 +28,6 @@ if not logger.handlers:
     console_handler.setFormatter(formatter)
 
     logger.addHandler(console_handler)
-
-    # ---------------------------
-    # ROTATING FILE HANDLER
-    # ---------------------------
 
     file_handler = RotatingFileHandler(
         filename=os.path.join(LOG_DIR, "app.log"),
@@ -64,11 +41,6 @@ if not logger.handlers:
     file_handler.setFormatter(formatter)
 
     logger.addHandler(file_handler)
-
-
-# ---------------------------
-# TRACE LOGGER ADAPTER
-# ---------------------------
 
 class TraceLoggerAdapter(logging.LoggerAdapter):
 
@@ -87,10 +59,6 @@ def get_logger(trace_id=None):
         logger,
         {"trace_id": trace_id or "NO_TRACE"}
     )
-
-# ---------------------------
-# STRUCTURED EVENT LOGGING
-# ---------------------------
 
 EVENT_LOG_FILE = os.path.join(LOG_DIR, "events.jsonl")
 

@@ -3,10 +3,6 @@ import requests
 
 from utils.llm import OpenRouterLLM
 
-# =====================================================
-# MOCK RESPONSE
-# =====================================================
-
 class MockHTTPResponse:
 
     def __init__(self, status_code, data):
@@ -17,11 +13,6 @@ class MockHTTPResponse:
     def json(self):
 
         return self._data
-
-
-# =====================================================
-# MOCK CACHE MANAGER
-# =====================================================
 
 class MockCacheManager:
 
@@ -78,11 +69,6 @@ def test_llm_success(monkeypatch):
 
     assert response.content == "Hello from LLM"
 
-
-# =====================================================
-# TEST: API FAILURE
-# =====================================================
-
 def test_llm_api_failure(monkeypatch):
 
     def fake_post(*args, **kwargs):
@@ -108,10 +94,6 @@ def test_llm_api_failure(monkeypatch):
     with pytest.raises(Exception):
 
         llm.invoke("hello")
-
-# =====================================================
-# TEST: CACHE HIT
-# =====================================================
 
 def test_llm_cache_hit(monkeypatch):
 
@@ -146,10 +128,6 @@ def test_llm_cache_hit(monkeypatch):
     response = llm.invoke("hello")
 
     assert response.content == "cached response"
-
-# =====================================================
-# TEST: CACHE MISS + SAVE
-# =====================================================
 
 def test_llm_cache_miss_and_save(monkeypatch):
 
@@ -192,10 +170,6 @@ def test_llm_cache_miss_and_save(monkeypatch):
     assert response.content == "fresh response"
 
     assert cache.saved[key] == "fresh response"
-    
-# =====================================================
-# TEST: THROTTLE EXECUTION
-# =====================================================
 
 def test_llm_throttle_called(monkeypatch):
 

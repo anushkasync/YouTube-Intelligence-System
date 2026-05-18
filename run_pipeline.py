@@ -1,5 +1,3 @@
-# pipeline.py
-
 import time
 from data.transcripts import extract_video_id, get_transcript
 from rag.chunker import chunk_text, Chunker
@@ -27,9 +25,8 @@ def run_pipeline(
     logger.info("Fetching transcript")
     video_id = extract_video_id(youtube_url)
 
-    # =====================================================
-    # 1. TRANSCRIPT (CACHE)
-    # =====================================================
+# TRANSCRIPT (CACHE)
+
     transcript = cache.get_transcript(video_id)
     logger.info("Transcript cache hit")
 
@@ -38,7 +35,7 @@ def run_pipeline(
 
         transcript = get_transcript(youtube_url)
 
-    # FINAL VALIDATION (VERY IMPORTANT)
+# FINAL VALIDATION (VERY IMPORTANT)
         if not transcript or not transcript.get("text") or transcript.get("text").strip() == "":
             logger.error("Empty transcript → stopping pipeline")
 
@@ -57,9 +54,7 @@ def run_pipeline(
 
     text = transcript.get("text", "")
 
-# =====================================================
-# 2. CHUNKING (CACHE)
-# =====================================================
+# CHUNKING (CACHE)
 
     chunk_key = cache.make_chunk_key(
     video_id,
@@ -70,9 +65,6 @@ def run_pipeline(
     chunks = cache.get_chunks(chunk_key)
     chunk_cache_hit = chunks is not None
 
-# -----------------------------
-# SAFE FALLBACK FIRST
-# -----------------------------
     if chunks is None:
         chunks = chunk_text(
         text,
@@ -81,9 +73,6 @@ def run_pipeline(
     )
     cache.save_chunks(chunk_key, chunks)
 
-# -----------------------------
-# NOW SAFE TO USE chunks
-# -----------------------------
     if not chunks or len(chunks) == 0:
         logger.error("Chunking failed: empty chunks")
 
@@ -94,15 +83,12 @@ def run_pipeline(
             "reason": "empty_chunks"
         }
     }
-# -----------------------------
-# SAFE TO USE FROM HERE
-# -----------------------------
+
     logger.info(f"Generated {len(chunks)} chunks")
     logger.info("Chunking completed")
 
-    # =====================================================
-    # 3. VECTORSTORE (CACHE)
-    # =====================================================
+
+# VECTORSTORE (CACHE)
     
     vs_key = cache.make_vectorstore_key(
     video_id,
@@ -124,9 +110,9 @@ def run_pipeline(
     
         cache.save_vectorstore(vs_key, vectorstore)
 
-    # =====================================================
-    # 4. PROCESSING (CACHE)
-    # =====================================================
+
+# PROCESSING (CACHE)
+
     mode = decide_mode(chunks)
     logger.info(f"Processing chunks in {mode} mode")
     processed_key = cache.make_processed_key(video_id, mode)
@@ -146,9 +132,9 @@ def run_pipeline(
 
         cache.save_processed_chunks(processed_key, processed_chunks)
 
-    # =====================================================
-    # 5. AGENT (NO CACHE HERE)
-    # =====================================================
+  
+# AGENT (NO CACHE HERE)
+
     logger.info("Running agent")
     result = run_agent(
         query=user_query,
@@ -186,6 +172,6 @@ def run_pipeline(
     "output": output,
     "metadata": metadata,
     "chunks" : chunks,
-    "processed_chunks": processed_chunks,   # IMPORTANT
+    "processed_chunks": processed_chunks,   
 }
     

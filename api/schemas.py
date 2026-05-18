@@ -1,12 +1,5 @@
-# api/schemas.py
-
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
-
-
-# ---------------------------
-# REQUESTS
-# ---------------------------
 
 class QueryRequest(BaseModel):
     youtube_url: str
@@ -19,11 +12,6 @@ class BenchmarkRequest(BaseModel):
 
 class EvaluateRequest(BaseModel):
     test_case_ids: Optional[List[str]] = None
-
-
-# ---------------------------
-# RESPONSES
-# ---------------------------
 
 class QueryResponse(BaseModel):
     success: bool

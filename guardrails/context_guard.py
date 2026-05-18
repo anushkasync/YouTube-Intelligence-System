@@ -1,5 +1,3 @@
-# guardrails/context_guard.py
-
 from sklearn.metrics.pairwise import cosine_similarity
 
 FALLBACK_RESPONSE = "Not enough relevant information found."

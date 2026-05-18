@@ -1,5 +1,3 @@
-# evaluations/test_loader.py
-
 import json
 import os
 

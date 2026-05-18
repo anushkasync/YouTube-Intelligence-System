@@ -13,16 +13,10 @@ def run_full_suite(cache, llm, config, mode="full"):
     """
 
     test_cases = load_test_cases()
-
-    # store pipeline outputs (shared input for both benchmark & eval)
     pipeline_results = []
 
-    # store evaluation outputs
     eval_results = []
 
-    # =====================================================
-    # STEP 1: RUN PIPELINE (COMMON FOR ALL MODES)
-    # =====================================================
     for test in test_cases:
 
         run_result = run_rag(test, config, cache, llm)
@@ -41,9 +35,6 @@ def run_full_suite(cache, llm, config, mode="full"):
 
         pipeline_results.append(base)
 
-    # =====================================================
-    # STEP 2: EVALUATION (LLM + RAGAS ONLY)
-    # =====================================================
     if mode in ["eval", "full"]:
         for item in pipeline_results:
 
@@ -61,17 +52,11 @@ def run_full_suite(cache, llm, config, mode="full"):
                 **eval_result
             })
 
-    # =====================================================
-    # STEP 3: BENCHMARK (NO LLM, SYSTEM + RETRIEVAL ONLY)
-    # =====================================================
     benchmark_results = None
 
     if mode in ["benchmark", "full"]:
         benchmark_results = run_benchmark(pipeline_results)
 
-    # =====================================================
-    # FINAL RETURN
-    # =====================================================
     return {
         "mode": mode,
         "benchmark": benchmark_results,

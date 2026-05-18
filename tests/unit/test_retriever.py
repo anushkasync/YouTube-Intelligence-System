@@ -1,5 +1,3 @@
-# test_retriever.py
-
 from rag.vectorstore import create_vectorstore
 from rag.embeddings import embedding_model
 from rag.retriever import get_retriever, search_similar_chunks

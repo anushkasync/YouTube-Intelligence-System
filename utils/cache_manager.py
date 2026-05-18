@@ -1,4 +1,3 @@
-# utils/cache_manager.py
 import os
 import json
 import hashlib
@@ -30,25 +29,19 @@ class CacheManager:
 
         ensure_dir(base_dir)
 
-        # json files
         self.transcript_path = os.path.join(base_dir, "transcripts.json")
         self.chunk_path = os.path.join(base_dir, "chunks.json")
         self.processed_chunk_path = os.path.join(base_dir, "processed_chunks.json")
         self.llm_path = os.path.join(base_dir, "llm_outputs.json")
 
-        # vectorstores
         self.vectorstore_dir = os.path.join(base_dir, "vectorstores")
         ensure_dir(self.vectorstore_dir)
 
-        # load memory
         self.transcripts = self._load_json(self.transcript_path)
         self.chunks = self._load_json(self.chunk_path)
         self.processed_chunks = self._load_json(self.processed_chunk_path)
         self.llm_outputs = self._load_json(self.llm_path)
 
-    # =====================================================
-    # INTERNAL
-    # =====================================================
 
     def _load_json(self, path):
         if not os.path.exists(path):
@@ -70,9 +63,7 @@ class CacheManager:
         except Exception:
             logger.error("Caching failed: unable to save data")
 
-    # =====================================================
     # TRANSCRIPTS
-    # =====================================================
 
     def get_transcript(self, video_id):
         return self.transcripts.get(video_id)
@@ -86,9 +77,7 @@ class CacheManager:
             self.transcripts
         )
 
-    # =====================================================
     # CHUNKS
-    # =====================================================
 
     def make_chunk_key(self, video_id, chunk_size, overlap):
 
@@ -110,9 +99,7 @@ class CacheManager:
             self.chunks
         )
 
-    # =====================================================
     # PROCESSED CHUNKS
-    # =====================================================
 
     def make_processed_key(self, video_id, mode):
 
@@ -133,9 +120,8 @@ class CacheManager:
             self.processed_chunks
         )
 
-    # =====================================================
     # VECTORSTORE
-    # =====================================================
+
     def make_vectorstore_key(self,video_id, embedding_model_name, chunk_size, overlap):
         return stable_hash({
         "video_id": video_id,
@@ -177,9 +163,7 @@ class CacheManager:
             logger.error("Caching failed: vectorstore load failed")
             return None
 
-    # =====================================================
     # LLM OUTPUTS
-    # =====================================================
 
     def make_llm_key(self, prompt, model):
 

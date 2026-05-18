@@ -1,5 +1,3 @@
-# chunker.py
-
 from config.config import CHUNK_SIZE, OVERLAP
 import re
 import numpy as np

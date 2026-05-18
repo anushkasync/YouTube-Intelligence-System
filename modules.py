@@ -1,9 +1,8 @@
-# summarizer.py
 from prompts.summary_prompt import SUMMARY_PROMPT
 from prompts.que_generator_prompt import QA_PROMPT
 from prompts.keypoints_prompt import KEYPOINTS_PROMPT
 
-# SMALL VIDEOS (≤ 5 chunks)
+
 def summarize_small(chunks, llm):
     text = "\n".join(chunks[:5])
     mode = "raw"
@@ -12,7 +11,6 @@ def summarize_small(chunks, llm):
 
     return llm.invoke(prompt).content
 
-# MEDIUM VIDEOS (6–19 chunks)
 
 def summarize_medium(processed_chunks, llm):
 
@@ -23,22 +21,16 @@ def summarize_medium(processed_chunks, llm):
 
     return llm.invoke(prompt).content
 
-# LONG (uses processed_chunks)
 def summarize_long(processed_chunks, llm):
 
-    # 1. Get representative chunks safely
     chunks = processed_chunks.get("long", [])
 
     if not chunks:
         return "Clustering failed. Unable to summarize long transcript safely."
 
-    # 2. Merge chunks
     merged_text = "\n\n".join(chunks)
-
-    # 3. Prevent token overflow (VERY IMPORTANT)
     merged_text = merged_text
-
-    # 4. Single LLM call
+    
     prompt = SUMMARY_PROMPT.format(
         content=merged_text,
         mode="long"
@@ -56,8 +48,6 @@ def generate_summary(processed_chunks, llm, mode):
     else:
         raise ValueError(f"Unsupported summary mode: {mode}")
         
-# Questions generation:
-
 def generate_questions(processed_chunks, llm, mode="medium"):
     """
     Generate questions based on processed chunks from Chunker.
@@ -68,9 +58,6 @@ def generate_questions(processed_chunks, llm, mode="medium"):
     - long → KMeans representative chunks
     """
 
-    # -------------------------
-    # Select chunk view
-    # -------------------------
     if mode == "small":
         text = "\n".join(processed_chunks["raw"])
         prompt = QA_PROMPT.format(content=text, mode = mode)
@@ -85,31 +72,18 @@ def generate_questions(processed_chunks, llm, mode="medium"):
 
         prompt = QA_PROMPT.format(content=text, mode = mode)
 
-    # -------------------------
-    # LLM call (single)
-    # -------------------------
     return llm.invoke(prompt).content
 
-
-# Keypoints 
 def generate_keypoints(processed_chunks, llm, mode="medium"):
-    # -------------------------
-    # SMALL VIDEO
-    # -------------------------
+
     if mode == "small":
         text = "\n".join(processed_chunks["raw"])
         prompt = KEYPOINTS_PROMPT.format(content=text, mode = mode)
 
-    # -------------------------
-    # MEDIUM VIDEO
-    # -------------------------
     elif mode == "medium":
         text = "\n".join(processed_chunks["medium"])
         prompt = KEYPOINTS_PROMPT.format(content=text, mode = mode)
 
-    # -------------------------
-    # LONG VIDEO
-    # -------------------------
     else:
         text = "\n".join(processed_chunks["long"])
         prompt = KEYPOINTS_PROMPT.format(content=text, mode = mode)

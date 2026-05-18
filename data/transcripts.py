@@ -5,10 +5,6 @@ import os
 import tempfile
 from config.config import CONFIG
 
-
-# -----------------------------
-# 1. Extract Video ID
-# -----------------------------
 def extract_video_id(youtube_url: str) -> str:
     parsed_url = urlparse(youtube_url)
 
@@ -24,10 +20,6 @@ def extract_video_id(youtube_url: str) -> str:
 
     raise ValueError("Invalid YouTube URL")
 
-
-# -----------------------------
-# 2. Normalize Transcript
-# -----------------------------
 def normalize_transcript(transcript):
     if hasattr(transcript, "snippets"):
         return " ".join([s.text for s in transcript.snippets])
@@ -45,19 +37,12 @@ def normalize_transcript(transcript):
 
     raise ValueError(f"Unsupported transcript format: {type(transcript)}")
 
-
-# -----------------------------
-# 3. PRIMARY METHOD: YouTube Transcript API
-# -----------------------------
 def fetch_from_api(video_id, language="en"):
     yt_api = YouTubeTranscriptApi()
     raw = yt_api.fetch(video_id, languages=[language])
     return normalize_transcript(raw)
 
 
-# -----------------------------
-# 4. FALLBACK: Whisper (FREE)
-# -----------------------------
 def fetch_with_whisper(youtube_url, language="en"):
     """
     Requires:
@@ -70,12 +55,10 @@ def fetch_with_whisper(youtube_url, language="en"):
     model = CONFIG.get("WHISPER_MODEL", "base")
     whisper_lang = CONFIG.get("WHISPER_LANGUAGE", language)
 
-    # Use temporary directory for files
     with tempfile.TemporaryDirectory() as temp_dir:
         audio_file = os.path.join(temp_dir, "audio.mp3")
         txt_file = os.path.join(temp_dir, "audio.txt")
 
-        # Step 1: Download audio
         try:
             subprocess.run([
                 "yt-dlp",
@@ -87,7 +70,6 @@ def fetch_with_whisper(youtube_url, language="en"):
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"yt-dlp download failed: {e.stderr}")
 
-        # Step 2: Transcribe using Whisper CLI
         try:
             result = subprocess.run([
                 "whisper",
@@ -100,21 +82,15 @@ def fetch_with_whisper(youtube_url, language="en"):
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Whisper transcription failed: {e.stderr}")
 
-        # Read the output file
         if os.path.exists(txt_file):
             with open(txt_file, "r", encoding="utf-8") as f:
                 return f.read().strip()
 
         raise RuntimeError("Whisper did not produce output file")
 
-
-# -----------------------------
-# 5. MAIN FUNCTION (WITH FALLBACK)
-# -----------------------------
 def get_transcript(youtube_url: str, language="en"):
     video_id = extract_video_id(youtube_url)
 
-    # Try 1: YouTube Transcript API
     try:
         text = fetch_from_api(video_id, language)
 
@@ -128,7 +104,6 @@ def get_transcript(youtube_url: str, language="en"):
         print(f"[WARN] Primary transcript failed: {e}")
         print("[INFO] Switching to Whisper fallback...")
 
-        # Try 2: Whisper fallback
         try:
             text = fetch_with_whisper(youtube_url, language)
 

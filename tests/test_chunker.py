@@ -1,5 +1,3 @@
-# test_chunker.py
-
 import pytest
 
 from rag.chunker import clean_text, chunk_text

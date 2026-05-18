@@ -1,4 +1,3 @@
-# run_evaluations.py 
 from evaluations.llm_as_judge import llm_judge_ux
 from evaluations.ragas_metrics import ragas_metrics
 from metrics.retrieval_eval import retrieval_metrics
@@ -15,10 +14,6 @@ def run_evaluation(query, output, processed_chunks, latency, config):
         ragas.get("faithfulness", 0.5) +
         ragas.get("answer_relevancy", 0.5)
     ) / 2
-
-    # -----------------------------
-    # LLM JUDGE (UX)
-    # -----------------------------
 
     ux_score = ux.get("overall_score", 0.5)
 

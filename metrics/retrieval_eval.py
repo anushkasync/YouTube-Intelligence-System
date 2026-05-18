@@ -1,5 +1,3 @@
-# retrieval_eval.py
-
 from sklearn.metrics.pairwise import cosine_similarity
 from rag.embeddings import embedding_model
 
@@ -26,8 +24,8 @@ def retrieval_metrics(query, processed_chunks, top_k=5):
     avg_top_k = float(sum(top_scores) / len(top_scores)) if top_scores else 0.0
 
     return {
-        "embedding_similarity_score": float(sum(sims) / len(sims)) if len(sims) else 0.0, #How semantically related the overall retrieved context is to the query.
-        "average_top_k_cosine_similarity": avg_top_k, #Average similarity of the BEST 
+        "embedding_similarity_score": float(sum(sims) / len(sims)) if len(sims) else 0.0, 
+        "average_top_k_cosine_similarity": avg_top_k,  
     }
 
 

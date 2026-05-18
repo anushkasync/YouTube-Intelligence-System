@@ -1,5 +1,3 @@
-# utils/llm.py
-
 import time
 import threading
 import requests
@@ -22,18 +20,11 @@ class OpenRouterLLM:
         self.model = model
         self.cache_manager = cache_manager
 
-        # =================================================
-        # THROTTLING
-        # =================================================
-
         self.min_interval = 3.0
 
         self._lock = threading.Lock()
         self._last_call = 0
 
-    # =====================================================
-    # THROTTLE
-    # =====================================================
 
     def _throttle(self):
 
@@ -52,15 +43,8 @@ class OpenRouterLLM:
 
             self._last_call = time.time()
 
-    # =====================================================
-    # INVOKE
-    # =====================================================
 
     def invoke(self, prompt):
-
-        # -------------------------------------------------
-        # CACHE CHECK
-        # -------------------------------------------------
 
         cache_key = None
 
@@ -93,15 +77,7 @@ class OpenRouterLLM:
                 "LLM cache miss → calling API"
             )
 
-        # -------------------------------------------------
-        # THROTTLE
-        # -------------------------------------------------
-
         self._throttle()
-
-        # -------------------------------------------------
-        # API CALL + RETRIES
-        # -------------------------------------------------
 
         max_retries = 3
 
@@ -142,10 +118,6 @@ class OpenRouterLLM:
                     timeout=60
                 )
 
-                # -----------------------------------------
-                # SAFE JSON PARSE
-                # -----------------------------------------
-
                 try:
                     data = response.json()
 
@@ -156,10 +128,6 @@ class OpenRouterLLM:
                             "Invalid JSON response"
                     }
 
-                # -----------------------------------------
-                # SUCCESS
-                # -----------------------------------------
-
                 if response.status_code == 200:
 
                     content = (
@@ -168,10 +136,6 @@ class OpenRouterLLM:
                     )
 
                     break
-
-                # -----------------------------------------
-                # API ERROR
-                # -----------------------------------------
 
                 logger.error(
                     f"LLM API error: {data}"
@@ -188,16 +152,8 @@ class OpenRouterLLM:
                     f"(attempt {attempt + 1}): {e}"
                 )
 
-                # -----------------------------------------
-                # FINAL FAILURE
-                # -----------------------------------------
-
                 if attempt == max_retries - 1:
                     raise
-
-                # -----------------------------------------
-                # EXPONENTIAL BACKOFF
-                # -----------------------------------------
 
                 wait_time = 2 ** attempt
 
@@ -208,20 +164,12 @@ class OpenRouterLLM:
 
                 time.sleep(wait_time)
 
-        # -------------------------------------------------
-        # SAVE CACHE
-        # -------------------------------------------------
-
         if self.cache_manager and cache_key:
 
             self.cache_manager.save_llm_output(
                 cache_key,
                 content
             )
-
-        # -------------------------------------------------
-        # RETURN RESPONSE
-        # -------------------------------------------------
 
         return type(
             "LLMResponse",
