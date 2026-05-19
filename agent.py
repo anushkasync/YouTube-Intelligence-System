@@ -81,16 +81,26 @@ Question:
     return llm.invoke(prompt).content.strip()
 
 
-def run_agent(query, chunks, processed_chunks, vectorstore, llm, return_meta=False, trace_id = None):
+def run_agent(
+    task,
+    query,
+    chunks,
+    processed_chunks,
+    vectorstore,
+    llm,
+    return_meta=False,
+    trace_id=None
+):
+
     logger = get_logger(trace_id)
 
     logger.info("Agent started")
 
-    valid, error = validate_query(query)
+    mode = decide_mode(chunks)
 
     metadata = {
-        "task": None,
-        "mode": None,
+        "task": task,
+        "mode": mode,
         "retrieval_used": False,
         "fallback_triggered": False,
         "failure_reason": None,
@@ -102,52 +112,61 @@ def run_agent(query, chunks, processed_chunks, vectorstore, llm, return_meta=Fal
         "latency": None
     }
 
-    if not valid:
-        logger.warning("Input validation failed")
-        metadata["failure_reason"] = "INVALID_INPUT"
-        metadata["fallback_triggered"] = True
-        return error if not return_meta else {"output": error, "metadata": metadata}
-
-    task = classify_intent(query, llm, metadata)
-    mode = decide_mode(chunks)
-
-    metadata["task"] = task
-    metadata["mode"] = mode
-
-    logger.info(f"Task classified as: {task}")
-
-    # INVALID INTENT STOP
-    if task is None:
-        logger.warning("Invalid intent detected")
-        return FALLBACK_RESPONSE if not return_meta else {"output": FALLBACK_RESPONSE, "metadata": metadata}
-
     result = None
 
     if task == "summary":
-        result = generate_summary(processed_chunks, llm, mode)
+
         logger.info("Running summary module")
 
+        result = generate_summary(
+            processed_chunks,
+            llm,
+            mode
+        )
+
     elif task == "keypoints":
-        result = generate_keypoints(processed_chunks, llm, mode)
+
         logger.info("Running keypoints module")
 
+        result = generate_keypoints(
+            processed_chunks,
+            llm,
+            mode
+        )
+
     elif task == "qa_gen":
-        result = generate_questions(query, vectorstore, llm)
-        logger.info("Running ques generation module")
+
+        logger.info("Running question generation module")
+
+        result = generate_questions(
+            query,
+            vectorstore,
+            llm
+        )
 
     elif task == "rag":
-        result = answer_with_rag(query, vectorstore, llm, metadata)
-        logger.info("Running rag module")
 
+        logger.info("Running RAG module")
+
+        result = answer_with_rag(
+            query,
+            vectorstore,
+            llm,
+            metadata
+        )
 
     if not validate_output(result):
-        logger.warning("Invalid output")
-        metadata["failure_reason"] = "OUTPUT_INVALID"
-        metadata["fallback_triggered"] = True
-        return FALLBACK_RESPONSE if not return_meta else {"output": FALLBACK_RESPONSE, "metadata": metadata}
 
+        logger.warning("Invalid output")
+
+        metadata["failure_reason"] = "OUTPUT_INVALID"
+
+        metadata["fallback_triggered"] = True
+
+        result = FALLBACK_RESPONSE
 
     if return_meta:
+
         return {
             "output": result,
             "metadata": metadata
