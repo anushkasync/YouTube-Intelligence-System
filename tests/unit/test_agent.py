@@ -230,27 +230,24 @@ def test_run_agent_summary_routing(monkeypatch):
         llm,
         mode
     ):
-        return (
-        "This is a sufficiently long summary output."
-    )
+        return "valid summary output"
 
     monkeypatch.setattr(
         "agent.generate_summary",
         fake_summary
     )
 
-    llm = MockLLM("summary")
-
     result = run_agent(
-        query="summarize this video",
+        task="summary",
+        query="summarize",
         chunks=["a", "b"],
-        processed_chunks=["processed"],
+        processed_chunks={"raw": ["x"]},
         vectorstore=None,
-        llm=llm,
+        llm=MockLLM(),
         return_meta=True
     )
 
-    assert result["output"] == "This is a sufficiently long summary output."
+    assert result["output"] == "valid summary output"
 
     assert result["metadata"]["task"] == "summary"
 
@@ -262,25 +259,24 @@ def test_run_agent_keypoints_routing(monkeypatch):
         llm,
         mode
     ):
-        return "The is sufficiently long keypoints output"
+        return "valid keypoints output"
 
     monkeypatch.setattr(
         "agent.generate_keypoints",
         fake_keypoints
     )
 
-    llm = MockLLM("keypoints")
-
     result = run_agent(
-        query="give keypoints",
+        task="keypoints",
+        query="keypoints",
         chunks=["a", "b"],
-        processed_chunks=["processed"],
+        processed_chunks={"raw": ["x"]},
         vectorstore=None,
-        llm=llm,
+        llm=MockLLM(),
         return_meta=True
     )
 
-    assert result["output"] == "The is sufficiently long keypoints output"
+    assert result["output"] == "valid keypoints output"
 
     assert result["metadata"]["task"] == "keypoints"
 
@@ -292,28 +288,26 @@ def test_run_agent_qa_routing(monkeypatch):
         vectorstore,
         llm
     ):
-        return "This is sufficiently long questions output"
+        return "valid questions output"
 
     monkeypatch.setattr(
         "agent.generate_questions",
         fake_questions
     )
 
-    llm = MockLLM("qa_gen")
-
     result = run_agent(
+        task="qa_gen",
         query="generate questions",
         chunks=["a", "b"],
-        processed_chunks=["processed"],
+        processed_chunks={"raw": ["x"]},
         vectorstore="fake_vs",
-        llm=llm,
+        llm=MockLLM(),
         return_meta=True
     )
 
-    assert result["output"] == "This is sufficiently long questions output"
+    assert result["output"] == "valid questions output"
 
     assert result["metadata"]["task"] == "qa_gen"
-
 
 def test_run_agent_rag_routing(monkeypatch):
 
@@ -323,133 +317,59 @@ def test_run_agent_rag_routing(monkeypatch):
         llm,
         metadata
     ):
-        return "This is sufficiently long rag output"
+        return (
+            "This is a sufficiently long and valid RAG output "
+            "that passes output validation safely."
+        )
 
     monkeypatch.setattr(
         "agent.answer_with_rag",
         fake_rag
     )
 
-    llm = MockLLM("rag")
-
     result = run_agent(
+        task="rag",
         query="what is ai?",
         chunks=["a", "b"],
-        processed_chunks=["processed"],
+        processed_chunks={"raw": ["x"]},
         vectorstore="fake_vs",
-        llm=llm,
+        llm=MockLLM(),
         return_meta=True
     )
 
-    assert result["output"] == "This is sufficiently long rag output"
+    assert (
+        result["output"]
+        == "This is a sufficiently long and valid RAG output that passes output validation safely."
+    )
 
     assert result["metadata"]["task"] == "rag"
 
-def test_run_agent_invalid_input(monkeypatch):
-
-    def fake_validate_query(query):
-        return False, "Query too short"
-
-    monkeypatch.setattr(
-        "agent.validate_query",
-        fake_validate_query
-    )
-
-    llm = MockLLM("summary")
-
-    result = run_agent(
-        query="bad query",
-        chunks=["a"],
-        processed_chunks=["processed"],
-        vectorstore=None,
-        llm=llm,
-        return_meta=True
-    )
-
-    assert result["output"] == "Query too short"
-
-    assert result["metadata"]["failure_reason"] == "INVALID_INPUT"
-
-    assert result["metadata"]["fallback_triggered"] is True
-
-
-def test_run_agent_invalid_intent(monkeypatch):
-
-    def fake_classify_intent(
-        query,
-        llm,
-        metadata
-    ):
-        return None
-
-    monkeypatch.setattr(
-        "agent.classify_intent",
-        fake_classify_intent
-    )
-
-    llm = MockLLM("summary")
-
-    result = run_agent(
-        query="hello",
-        chunks=["a"],
-        processed_chunks=["processed"],
-        vectorstore=None,
-        llm=llm
-    )
-
-    assert result == FALLBACK_RESPONSE
-
-
 def test_run_agent_invalid_output(monkeypatch):
-
-    def fake_validate_query(query):
-        return True, None
-
-    monkeypatch.setattr(
-        "agent.validate_query",
-        fake_validate_query
-    )
-
-    def fake_classify_intent(
-        query,
-        llm,
-        metadata
-    ):
-        return "summary"
-
-    monkeypatch.setattr(
-        "agent.classify_intent",
-        fake_classify_intent
-    )
 
     def fake_summary(
         processed_chunks,
         llm,
         mode
     ):
-        return "summary output"
+        return "bad output"
 
     monkeypatch.setattr(
         "agent.generate_summary",
         fake_summary
     )
 
-    def fake_validate_output(output):
-        return False
-
     monkeypatch.setattr(
         "agent.validate_output",
-        fake_validate_output
+        lambda output: False
     )
 
-    llm = MockLLM("summary")
-
     result = run_agent(
+        task="summary",
         query="summarize",
         chunks=["a"],
-        processed_chunks=["processed"],
+        processed_chunks={"raw": ["x"]},
         vectorstore=None,
-        llm=llm,
+        llm=MockLLM(),
         return_meta=True
     )
 
