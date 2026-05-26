@@ -16,7 +16,7 @@ WHISPER_ENABLED = True
 WHISPER_MODEL = "base"  
 WHISPER_LANGUAGE = "en"  
 
-ENV = os.getenv("APP_ENV", "dev").lower()  
+ENV = os.getenv("APP_ENV", "prod").lower()  
 CACHE_DIR = "logs/cache"
 SYSTEM_LOG_FILE = "logs/systems.log"
 BENCHMARK_RESULTS_FILE = "logs/benchmark_results.json"

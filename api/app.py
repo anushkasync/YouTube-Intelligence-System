@@ -30,7 +30,15 @@ logger = get_logger("FASTAPI")
 cache = None
 llm = None
 
+def require_dev():
 
+    if ENV != "dev":
+
+        raise HTTPException(
+            status_code=403,
+            detail="Developer-only endpoint"
+        )
+    
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
@@ -85,6 +93,8 @@ def root():
 )
 def health():
 
+    require_dev()
+
     return {
         "status": "healthy",
         "cache": "initialized" if cache else "not_initialized",
@@ -119,7 +129,7 @@ def query_video(request: QueryRequest):
         output = result.get("output", "")
         metadata = result.get("metadata", {})
 
-        metadata["trace_id"] = trace_id
+        #metadata["trace_id"] = trace_id
         metadata["latency"] = round(
             time.time() - start,
             2
@@ -152,6 +162,8 @@ def query_video(request: QueryRequest):
 
 @app.post("/evaluation")
 def evaluation():
+
+    require_dev()
 
     trace_id = str(uuid.uuid4())
 
@@ -199,6 +211,7 @@ def evaluation():
 @app.post("/benchmark")
 def benchmark():
 
+    require_dev()
     trace_id = str(uuid.uuid4())
 
     logger.info(
