@@ -9,6 +9,8 @@ This project ingests YouTube videos, extracts transcripts, processes them into s
 
 The system is built to be **LLM-cost aware and production-oriented**, ensuring minimal redundant API usage while maintaining modularity across different AI tasks.
 
+<img width="1320" height="1649" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/5da46ac7-379a-443c-8c9b-5a04c22fc60a" />
+
 ## Core Modules
 - Summarization Module
 - Key-Points Generation Module
