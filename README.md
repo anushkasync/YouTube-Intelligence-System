@@ -41,7 +41,6 @@ pip install -r requirements.txt
 python -m uvicorn api.app:app --reload
 ```
 ## Architecture Decisions
-This system is a deterministic pipeline for YouTube video understanding, optimized for low latency, cost efficiency, and scalable retrieval-based reasoning.
 
 ### Transcript Extraction
 * Primary: YouTube Transcript API
