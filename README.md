@@ -40,6 +40,19 @@ pip install -r requirements.txt
 ```bash
 python -m uvicorn api.app:app --reload
 ```
+
+## Tech Stack
+
+- Python
+- FastAPI
+- LangChain
+- Groq APIs
+- FAISS
+- Youtube transcript API
+- Whisper
+- Uvicorn
+- Pytest
+
 ## Architecture Decisions
 
 ### Transcript Extraction
