@@ -15,7 +15,7 @@ The system is built to be **LLM-cost aware and production-oriented**, ensuring m
 - Question Generation Module
 - RAG Answering Module
 
-<img width="1200" height="1549" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/5da46ac7-379a-443c-8c9b-5a04c22fc60a" />
+<img width="1000" height="1000" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/5da46ac7-379a-443c-8c9b-5a04c22fc60a" />
 
 ## Architecture Overview
 This system is a deterministic pipeline for YouTube video understanding, optimized for low latency, cost efficiency, and scalable retrieval-based reasoning.
