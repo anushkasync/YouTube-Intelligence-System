@@ -59,16 +59,12 @@ python -m uvicorn api.app:app --reload
 * Primary: YouTube Transcript API
 * Fallback: Whisper transcription
 
-Ensures fast-path retrieval with graceful degradation when transcripts are unavailable.
-
 ### Adaptive Chunking Strategy
 | Video Type | Processing Strategy | Reason
 |---|---|---|
 | Small Videos | Raw chunks | Full context retained without additional processing
 | Medium Videos | Top-K retrieval | Improves relevance filtering
 | Long Videos | KMeans clustering | Improves coverage by selecting diverse semantic centroids and reducing redundancy
-
-Different video lengths introduce varying challenges in retrieval and token efficiency.
 
 ### Single-Pass LLM Generation
 All processed chunks are merged and passed through a single LLM call per module.
@@ -80,24 +76,18 @@ Prompts are dynamically selected based on video length:
 * Medium → relevance-focused generation
 * Long → abstraction and coverage optimization
 
-Prompt versions are maintained for iterative improvement and reproducibility.
-
 ### Multi-Layer Caching
 Caching is applied across:
 * transcripts
-* chunks
-* processed chunks
+* raw and processed chunks
 * vector store
 * LLM outputs
-
-Reduces redundant computation and API overhead across repeated requests.
 
 ### Evaluation & Observability
 Includes:
 * unit, integration, and smoke tests
 * structured logging and tracing
-* LLM-based evaluation (clarity, completeness, usefulness)
-* RAG evaluation (faithfulness, relevance)
+* LLM-based and RAG evaluation
 
 ### Throttling & Rate Control
 Implements request throttling to ensure system stability under multi-stage LLM pipelines and external API rate limits.
@@ -105,8 +95,7 @@ Implements request throttling to ensure system stability under multi-stage LLM p
 ### Model Strategy
 A single primary LLM is used across modules.
 Multi-model comparison is deprioritized due to:
-* multiple LLM calls per request (classification + generation + evaluation)
-* increased latency and cost
+* multiple LLM calls per request (classification + generation)
 * external provider rate limits (especially in free-tier environments)
 
 ### Environment Separation
