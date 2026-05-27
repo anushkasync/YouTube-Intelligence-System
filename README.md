@@ -13,23 +13,23 @@ The system extracts and processes video transcripts into structured representati
 ## Architecture Diagram
 <img width="600" height="600" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/5da46ac7-379a-443c-8c9b-5a04c22fc60a" />
 
-## Architecture Overview
+## Architecture Design
 This system is a deterministic pipeline for YouTube video understanding, optimized for low latency, cost efficiency, and scalable retrieval-based reasoning.
 
 ### Transcript Extraction
 * Primary: YouTube Transcript API
 * Fallback: Whisper transcription
+
 Ensures fast-path retrieval with graceful degradation when transcripts are unavailable.
 
 ### Adaptive Chunking Strategy
-Video Type	Strategy
-Short	Raw chunks
-Medium	Top-K retrieval
-Long	K-Means clustering
+| Video Type | Processing Strategy | Reason
+|---|---|---|
+| Small Videos | Raw chunks | Full context retained without additional processing
+| Medium Videos | Top-K retrieval | Improves relevance filtering
+| Long Videos | KMeans clustering | Improves coverage by selecting diverse semantic centroids and reducing redundancy
+
 Different video lengths introduce varying challenges in retrieval and token efficiency.
-* Short videos: full context retained without additional processing
-* Medium videos: Top-K retrieval improves relevance filtering
-* Long videos: K-Means improves coverage by selecting diverse semantic centroids and reducing redundancy
 
 ### Single-Pass LLM Generation
 All processed chunks are merged and passed through a single LLM call per module.
@@ -40,6 +40,7 @@ Prompts are dynamically selected based on video length:
 * Short → detail preservation
 * Medium → relevance-focused generation
 * Long → abstraction and coverage optimization
+
 Prompt versions are maintained for iterative improvement and reproducibility.
 
 ### Multi-Layer Caching
@@ -49,6 +50,7 @@ Caching is applied across:
 * processed chunks
 * vector store
 * LLM outputs
+
 Reduces redundant computation and API overhead across repeated requests.
 
 ### Evaluation & Observability
@@ -71,14 +73,8 @@ Multi-model comparison is deprioritized due to:
 ### Environment Separation
 * Development: benchmarking, evaluation endpoints, health checks
 * Production: inference-only API surface
-Ensures safe deployment and reduced attack surface.
 
 ### Deterministic Orchestration vs Autonomous Agents
-The system intentionally uses a deterministic pipeline architecture instead of autonomous agent-based workflows.
-The problem space is highly structured and consists of fixed stages
-- transcript extraction
-- chunking and preprocessing
-- retrieval or clustering
-- single-pass generation
-- evaluation and benchmarking
-Autonomous agent frameworks were avoided as they introduce unnecessary orchestration complexity and multi-step reasoning overhead for a well-defined pipeline problem.
+The system uses a deterministic pipeline instead of autonomous agents because the workflow is fixed and well-structured (transcript extraction, chunking, retrieval, generation, and evaluation). 
+
+Agent-based orchestration was avoided to reduce unnecessary complexity and overhead.
