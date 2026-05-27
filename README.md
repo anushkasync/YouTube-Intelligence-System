@@ -89,11 +89,7 @@ Includes:
 * structured logging and tracing
 * LLM-based and RAG evaluation
 
-### Throttling & Rate Control
-Implements request throttling to ensure system stability under multi-stage LLM pipelines and external API rate limits.
-
 ### Model Strategy
-A single primary LLM is used across modules.
 Multi-model comparison is deprioritized due to:
 * multiple LLM calls per request (classification + generation)
 * external provider rate limits (especially in free-tier environments)
@@ -103,6 +99,4 @@ Multi-model comparison is deprioritized due to:
 * Production: inference-only API surface
 
 ### Deterministic Orchestration vs Autonomous Agents
-The system uses a deterministic pipeline instead of autonomous agents because the workflow is fixed and well-structured (transcript extraction, chunking, retrieval, generation, and evaluation). 
-
-Agent-based orchestration was avoided to reduce unnecessary complexity and overhead.
+Uses a deterministic pipeline instead of autonomous agents because the workflow is fixed and structured, reducing orchestration complexity and overhead.
