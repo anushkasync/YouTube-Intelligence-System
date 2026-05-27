@@ -10,10 +10,10 @@ This project ingests YouTube videos, extracts transcripts, processes them into s
 The system is built to be **LLM-cost aware and production-oriented**, ensuring minimal redundant API usage while maintaining modularity across different AI tasks.
 
 ## Core Modules
-### - Summarization Module
-### - Key-Points Generation Module
-### - Question Generation Module
-### - RAG Answering Module
+- Summarization Module
+- Key-Points Generation Module
+- Question Generation Module
+- RAG Answering Module
 
 ## Architecture Overview
 This system is a deterministic pipeline for YouTube video understanding, optimized for low latency, cost efficiency, and scalable retrieval-based reasoning.
