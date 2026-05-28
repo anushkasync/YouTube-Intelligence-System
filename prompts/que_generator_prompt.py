@@ -15,5 +15,8 @@ Rules:
 Content:
 {content}
 
+Mode:
+{mode}
+
 Questions:
 """

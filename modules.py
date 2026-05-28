@@ -12,18 +12,16 @@ def summarize_small(chunks, llm):
     return llm.invoke(prompt).content
 
 
-def summarize_medium(processed_chunks, llm):
+def summarize_medium(chunks, llm):
 
-    text = "\n".join(processed_chunks["medium"])
+    text = "\n".join(chunks)
     mode = "medium"
 
     prompt = SUMMARY_PROMPT.format(content=text, mode=mode)
 
     return llm.invoke(prompt).content
 
-def summarize_long(processed_chunks, llm):
-
-    chunks = processed_chunks.get("long", [])
+def summarize_long(chunks, llm):
 
     if not chunks:
         return "Clustering failed. Unable to summarize long transcript safely."
@@ -39,14 +37,32 @@ def summarize_long(processed_chunks, llm):
     return llm.invoke(prompt).content
 
 def generate_summary(processed_chunks, llm, mode):
+
     if mode in ("raw", "small"):
-        return summarize_small(processed_chunks.get("raw", [])[:3], llm)
+
+        return summarize_small(
+            processed_chunks["raw"],
+            llm
+        )
+
     elif mode == "medium":
-        return summarize_medium(processed_chunks, llm)
+
+        return summarize_medium(
+            processed_chunks["medium"],
+            llm
+        )
+
     elif mode == "long":
-        return summarize_long(processed_chunks, llm)
+
+        return summarize_long(
+            processed_chunks["long"],
+            llm
+        )
+
     else:
-        raise ValueError(f"Unsupported summary mode: {mode}")
+        raise ValueError(
+            f"Unsupported summary mode: {mode}"
+        )
         
 def generate_questions(processed_chunks, llm, mode="medium"):
     """

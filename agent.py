@@ -139,9 +139,9 @@ def run_agent(
         logger.info("Running question generation module")
 
         result = generate_questions(
-            query,
-            vectorstore,
-            llm
+            processed_chunks,
+            llm,
+            mode
         )
 
     elif task == "rag":
