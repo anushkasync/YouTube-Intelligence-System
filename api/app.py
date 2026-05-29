@@ -47,9 +47,7 @@ async def lifespan(app: FastAPI):
 
     logger.info("FastAPI application starting")
 
-    cache = CacheManager(
-        base_dir=CONFIG["CACHE_DIR"]
-    )
+    cache = CacheManager()
 
     logger.info("Cache manager initialized")
 

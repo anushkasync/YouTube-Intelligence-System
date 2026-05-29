@@ -116,15 +116,29 @@ def run_pipeline(
 
     text = transcript.get("text", "")
 
+    cached_meta = cache.lookup_video_metadata(video_id)
+
+    if cached_meta:
+        logger.info("SQLite metadata index hit — restoring cache pointers")
+
     chunk_key = cache.make_chunk_key(
         video_id,
         config["CHUNK_SIZE"],
         config["OVERLAP"]
     )
 
-    chunks = cache.get_chunks(chunk_key)
+    chunks = None
+    chunk_cache_hit = False
 
-    chunk_cache_hit = chunks is not None
+    if cached_meta and cached_meta["chunk_key"] == chunk_key:
+        chunks = cache.get_chunks(chunk_key)
+        if chunks is not None:
+            chunk_cache_hit = True
+            logger.info("Chunks restored via metadata index")
+
+    if chunks is None:
+        chunks = cache.get_chunks(chunk_key)
+        chunk_cache_hit = chunks is not None
 
     if chunks is None:
 
@@ -161,12 +175,25 @@ def run_pipeline(
 
     logger.info("Loading vectorstore")
 
-    vectorstore = cache.load_vectorstore(
-        vs_key,
-        embedding_model
-    )
+    vectorstore = None
+    vs_cache_hit = False
 
-    vs_cache_hit = vectorstore is not None
+    if cached_meta:
+        faiss_path = cached_meta["faiss_vectorstore_path"]
+        vectorstore = cache.load_vectorstore_from_path(
+            faiss_path,
+            embedding_model,
+        )
+        if vectorstore is not None:
+            vs_cache_hit = True
+            logger.info("Vectorstore restored via metadata index")
+
+    if vectorstore is None:
+        vectorstore = cache.load_vectorstore(
+            vs_key,
+            embedding_model
+        )
+        vs_cache_hit = vectorstore is not None
 
     if vectorstore is None:
         logger.info("Creating vectorstore")
@@ -212,9 +239,15 @@ def run_pipeline(
         mode
     )
 
-    processed_chunks = cache.get_processed_chunks(
-        processed_key
-    )
+    processed_chunks = None
+
+    if cached_meta and cached_meta["processed_key"] == processed_key:
+        processed_chunks = cache.get_processed_chunks(processed_key)
+        if processed_chunks is not None:
+            logger.info("Processed chunks restored via metadata index")
+
+    if processed_chunks is None:
+        processed_chunks = cache.get_processed_chunks(processed_key)
 
     if processed_chunks is None:
 
@@ -232,6 +265,13 @@ def run_pipeline(
             processed_key,
             processed_chunks
         )
+
+    cache.save_video_metadata(
+        video_id,
+        cache.vectorstore_path(vs_key),
+        chunk_key,
+        processed_key,
+    )
 
     logger.info("Running agent")
 

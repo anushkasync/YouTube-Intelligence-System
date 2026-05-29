@@ -17,6 +17,7 @@ htmlcov/
 .idea/
 
 logs/
+data/
 *.log
 *.jsonl
 

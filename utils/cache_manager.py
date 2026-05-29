@@ -3,6 +3,8 @@ import json
 import hashlib
 from logger import get_logger
 from langchain_community.vectorstores import FAISS
+from config.config import CACHE_DIR
+from utils.metadata_index import MetadataIndex
 
 logger = get_logger("CACHE_MANAGER")
 
@@ -18,22 +20,25 @@ def stable_hash(value):
 
 class CacheManager:
 
-    def __init__(self, base_dir="cache"):
+    def __init__(self, base_dir=None):
 
-        self.base_dir = base_dir
+        self.base_dir = base_dir or CACHE_DIR
 
         logger.info(
-    f"Initializing cache manager at {base_dir}"
-)
-        ensure_dir(base_dir)
+            f"Initializing cache manager at {self.base_dir}"
+        )
+        ensure_dir(self.base_dir)
 
-        self.transcript_path = os.path.join(base_dir, "transcripts.json")
-        self.chunk_path = os.path.join(base_dir, "chunks.json")
-        self.processed_chunk_path = os.path.join(base_dir, "processed_chunks.json")
-        self.llm_path = os.path.join(base_dir, "llm_outputs.json")
+        self.transcript_path = os.path.join(self.base_dir, "transcripts.json")
+        self.chunk_path = os.path.join(self.base_dir, "chunks.json")
+        self.processed_chunk_path = os.path.join(self.base_dir, "processed_chunks.json")
+        self.llm_path = os.path.join(self.base_dir, "llm_outputs.json")
 
-        self.vectorstore_dir = os.path.join(base_dir, "vectorstores")
+        self.vectorstore_dir = os.path.join(self.base_dir, "vectorstores")
         ensure_dir(self.vectorstore_dir)
+
+        self.metadata_db_path = os.path.join(self.base_dir, "metadata.db")
+        self.metadata_index = MetadataIndex(self.metadata_db_path)
 
         self.transcripts = self._load_json(self.transcript_path)
         self.chunks = self._load_json(self.chunk_path)
@@ -146,37 +151,53 @@ class CacheManager:
         f"Vectorstore save failed: {str(e)}"
     )
     def load_vectorstore(self, key, embedding_model):
-        path = self.vectorstore_path(key)
+        return self.load_vectorstore_from_path(
+            self.vectorstore_path(key),
+            embedding_model,
+        )
 
-        logger.info(
-    f"Checking vectorstore path: {path}"
-)
+    def load_vectorstore_from_path(self, path, embedding_model):
+
+        logger.info(f"Checking vectorstore path: {path}")
+
         if not os.path.exists(path):
-            logger.warning(
-        f"Vectorstore cache miss: {path}"
-    )
-
+            logger.warning(f"Vectorstore cache miss: {path}")
             return None
 
         try:
             vectorstore = FAISS.load_local(
-        path,
-        embedding_model,
-        allow_dangerous_deserialization=True
-    )
+                path,
+                embedding_model,
+                allow_dangerous_deserialization=True,
+            )
 
-            logger.info(
-        f"Vectorstore loaded successfully: {path}"
-    )
-
+            logger.info(f"Vectorstore loaded successfully: {path}")
             return vectorstore
 
         except Exception as e:
-            logger.error(
-        f"Vectorstore load failed: {str(e)}"
-    )
-
+            logger.error(f"Vectorstore load failed: {str(e)}")
             return None
+
+    # METADATA INDEX (SQLite — pointers only, no embeddings/chunks)
+
+    def lookup_video_metadata(self, video_id):
+
+        return self.metadata_index.get(video_id)
+
+    def save_video_metadata(
+        self,
+        video_id,
+        faiss_vectorstore_path,
+        chunk_key,
+        processed_key,
+    ):
+
+        self.metadata_index.upsert(
+            video_id,
+            faiss_vectorstore_path,
+            chunk_key,
+            processed_key,
+        )
 
     # LLM OUTPUTS
 

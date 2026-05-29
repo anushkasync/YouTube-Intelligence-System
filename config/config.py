@@ -21,8 +21,17 @@ BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))
 )
 LOG_DIR = os.path.join(BASE_DIR, "logs")
-CACHE_DIR = os.path.join(LOG_DIR, "cache")
-SYSTEM_LOG_FILE = os.path.join(LOG_DIR,"systems.log")
+
+# Persistent cache root — separate from logs.
+# Railway: mount volume at /data (override with CACHE_DIR env var).
+_DEFAULT_CACHE_DIR = (
+    "/data"
+    if os.path.isdir("/data")
+    else os.path.join(BASE_DIR, "data", "cache")
+)
+CACHE_DIR = os.getenv("CACHE_DIR", _DEFAULT_CACHE_DIR)
+
+SYSTEM_LOG_FILE = os.path.join(LOG_DIR, "systems.log")
 BENCHMARK_RESULTS_FILE = os.path.join(
     LOG_DIR,
     "benchmark_results.json"
