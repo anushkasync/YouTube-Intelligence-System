@@ -27,66 +27,57 @@ def decide_mode(chunks):
         return "medium"
     return "long"
 
-def answer_with_rag(query, vectorstore, llm, metadata=None, k=2):
+def answer_with_rag(query, vectorstore, llm, metadata=None, k=4):
 
-    results = vectorstore.similarity_search_with_score(query, k=k)
+    results = vectorstore.similarity_search(query, k=k)
 
     if not results:
         if metadata:
             metadata.update({
                 "retrieval_used": True,
                 "fallback_triggered": True,
-                "failure_reason": "NO_RETRIEVED_CHUNKS",
-                "retrieval": {"score": 0.0, "chunks": [], "top_k": 0}
+                "failure_reason": "NO_RETRIEVED_CHUNKS"
             })
+
         return FALLBACK_RESPONSE
 
-    chunks = [doc.page_content for doc, score in results]
-    scores = [score for doc, score in results]
-
-    avg_score = sum(scores) / len(scores)
-
-    threshold = 0.2
+    chunks = [doc.page_content for doc in results]
 
     if metadata:
         metadata.update({
             "retrieval_used": True,
             "retrieval": {
-                "score": float(avg_score),
                 "chunks": chunks,
                 "top_k": len(chunks)
             }
         })
 
-    if avg_score < threshold:
-        if metadata:
-            metadata["fallback_triggered"] = True
-            metadata["failure_reason"] = "LOW_CONTEXT_RELEVANCE"
-        return FALLBACK_RESPONSE
-
     context = "\n\n".join(chunks)
 
     prompt = f"""
-You are a precise QA assistant.
+You are a precise retrieval QA assistant.
 
-Answer using ONLY the context below.
+Answer ONLY using the context below.
 
-If answer is missing, respond:
+If the context partially answers the question,
+provide the closest relevant answer.
+
+Only say:
 "Not found in the video."
+if there is truly no relevant information.
 
-- Keep the answer short and direct.
-- Do NOT add explanations unless asked.
-- Prefer 2–5 sentences maximum.
+Keep answers concise.
 
 Context:
 {context}
 
-Q: {query}
-A:
+Question:
+{query}
+
+Answer:
 """
 
     return llm.invoke(prompt).content.strip()
-
 
 def run_agent(
     task,
