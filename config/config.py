@@ -25,7 +25,7 @@ LOG_DIR = os.path.join(BASE_DIR, "logs")
 # Persistent cache root — separate from logs.
 # Railway: mount volume at /data (override with CACHE_DIR env var).
 _DEFAULT_CACHE_DIR = (
-    "/data"
+    "/data/cache"
     if os.path.isdir("/data")
     else os.path.join(BASE_DIR, "data", "cache")
 )

@@ -1,5 +1,5 @@
 import time
-from data.transcripts import extract_video_id, get_transcript
+from transcripts import extract_video_id, get_transcript
 from rag.chunker import chunk_text, Chunker
 from rag.vectorstore import create_vectorstore
 from rag.embeddings import embedding_model

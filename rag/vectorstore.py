@@ -1,6 +1,6 @@
 from logger import get_logger
 from langchain_community.vectorstores import FAISS
-from data.documents import build_documents
+from documents import build_documents
 
 logger = get_logger("VECTORSTORE")
 
