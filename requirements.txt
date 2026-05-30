@@ -22,9 +22,7 @@ youtube-transcript-api==1.2.4
 sentence-transformers==5.4.1
 torch==2.11.0
 
-<<<<<<< HEAD
+
 faiss-cpu
-=======
-supadata
 streamlit==1.42.0
->>>>>>> b5120b0 (Add streamlit frontend)
+
