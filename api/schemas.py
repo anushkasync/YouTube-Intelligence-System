@@ -4,6 +4,7 @@ from typing import Optional, Dict, Any, List
 class QueryRequest(BaseModel):
     youtube_url: str
     query: str
+    task: Optional[str] = None
 
 
 class BenchmarkRequest(BaseModel):

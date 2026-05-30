@@ -9,13 +9,22 @@ from agent import run_agent, decide_mode, classify_intent
 from guardrails.input_guard import validate_query
 from config.policy import FALLBACK_RESPONSE
 
+from guardrails.intent_guard import VALID_TASKS
+
+STRATEGY_BY_MODE = {
+    "small": "RAW",
+    "medium": "TOP_K",
+    "long": "K_MEANS",
+}
+
 def run_pipeline(
     youtube_url,
     user_query,
     cache,
     llm,
     config,
-    return_chunks=False
+    return_chunks=False,
+    task=None,
 ):
 
     trace_id = uuid.uuid4().hex
@@ -53,15 +62,13 @@ def run_pipeline(
             "metadata": metadata
         }
 
-    task = classify_intent(user_query, llm, metadata)
-
-    metadata["task"] = task
-
-    logger.info(f"Task classified as: {task}")
-
     if task is None:
+        task = classify_intent(user_query, llm, metadata)
+    else:
+        task = task.strip().lower()
 
-        logger.warning("Invalid intent detected")
+    if task not in VALID_TASKS:
+        logger.warning("Invalid task detected")
 
         metadata["failure_reason"] = "INVALID_INTENT"
         metadata["fallback_triggered"] = True
@@ -71,8 +78,13 @@ def run_pipeline(
             "metadata": metadata
         }
 
+    metadata["task"] = task
 
+
+    logger.info(f"Task classified as: {task}")
     logger.info("Fetching transcript")
+
+    transcript_cache_hit = False
 
     video_id = extract_video_id(youtube_url)
 
@@ -113,6 +125,7 @@ def run_pipeline(
 
     else:
         logger.info("Transcript cache hit (valid)")
+        transcript_cache_hit = True
 
     text = transcript.get("text", "")
 
@@ -240,14 +253,18 @@ def run_pipeline(
     )
 
     processed_chunks = None
+    processed_cache_hit = False
 
     if cached_meta and cached_meta["processed_key"] == processed_key:
         processed_chunks = cache.get_processed_chunks(processed_key)
         if processed_chunks is not None:
+            processed_cache_hit = True
             logger.info("Processed chunks restored via metadata index")
 
     if processed_chunks is None:
         processed_chunks = cache.get_processed_chunks(processed_key)
+        if processed_chunks is not None:
+            processed_cache_hit = True
 
     if processed_chunks is None:
 
@@ -294,9 +311,22 @@ def run_pipeline(
         time.time() - start
     )
 
+    fully_cached = (
+        transcript_cache_hit
+        and chunk_cache_hit
+        and vs_cache_hit
+        and processed_cache_hit
+    )
+
+    agent_metadata["strategy"] = STRATEGY_BY_MODE.get(mode, mode.upper())
+    agent_metadata["chunk_count"] = len(chunks)
+    agent_metadata["cached"] = fully_cached
     agent_metadata["cache"] = {
+        "cached": fully_cached,
+        "transcript_hit": transcript_cache_hit,
         "chunk_hit": chunk_cache_hit,
-        "vectorstore_hit": vs_cache_hit
+        "vectorstore_hit": vs_cache_hit,
+        "processed_hit": processed_cache_hit,
     }
 
     logger.info("Pipeline completed")

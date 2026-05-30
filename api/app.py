@@ -119,7 +119,8 @@ def query_video(request: QueryRequest):
             user_query=request.query,
             cache=cache,
             llm=llm,
-            config=CONFIG
+            config=CONFIG,
+            task=request.task,
         )
 
         output = result.get("output", "")
