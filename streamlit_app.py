@@ -183,9 +183,9 @@ if submitted:
         else:
             st.success("⚙️ Processed fresh")
 
-        # st.markdown('<div class="output-box">', unsafe_allow_html=True)
+        st.markdown('<div class="output-box">', unsafe_allow_html=True)
         st.markdown(output)
-        #st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
         if metadata.get("fallback_triggered"):
             reason = metadata.get("failure_reason") or "Unknown"
